@@ -1,11 +1,22 @@
 rootDir=`pwd`
 
 rm -rf ./build/
-mkdir build
+mkdir -p ./build/builder
 
-cd builder
+dotnet publish $rootDir/builder --use-current-runtime true --self-contained false -c Release --output $rootDir/build/builder
 
-dotnet publish -c Release
+exitCode=$?
+SUCCESS=0
+
+cd $rootDir
+if [ "$exitCode" -ne $SUCCESS ]
+then
+    echo "\nERROR at build 'builder'\n"
+    exit;
+fi
+
+dotnet $rootDir/build/builder/builder.dll
+
 
 # cp -r ../trusts build
 
