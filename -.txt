@@ -1,0 +1,32 @@
+https://learn.microsoft.com/ru-ru/dotnet/api/
+
+https://learn.microsoft.com/ru-ru/dotnet/core/tools/dotnet
+
+# dotnet --list-sdks
+# dotnet --list-runtimes
+
+
+dotnet new console  --framework net7.0 --use-program-main
+dotnet new classlib --framework net7.0
+dotnet new sln
+
+# dotnet add package Figgle
+
+
+https://learn.microsoft.com/ru-ru/dotnet/core/tools/dotnet-sln
+
+dotnet sln list
+dotnet sln add ./tests/exe/
+dotnet sln remove ./tests/exe/
+
+dotnet sln todo.sln add (ls -r **/*.csproj)
+
+
+# https://learn.microsoft.com/ru-ru/dotnet/core/deploying/deploy-with-cli
+# https://learn.microsoft.com/ru-ru/dotnet/core/deploying/trimming/trim-self-contained
+# https://learn.microsoft.com/ru-ru/dotnet/core/rid-catalog
+# dotnet publish -c Release -r linux-x64 --self-contained true
+# --use-current-runtime true
+
+
+dotnet add ./builder/ reference ./libs/utils/
