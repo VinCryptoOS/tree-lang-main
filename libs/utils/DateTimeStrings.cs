@@ -2,21 +2,33 @@
 public static class DateTimeStrings
 {
     [Flags]
-    public enum getTimeString_options: byte { Date = 1, Time = 2 }
+    /// <summary>Флаги для функции getTimeString_options)</summary>
+    public enum getTimeString_options: byte { None = 0, Date = 1, Time = 2, Seconds = 4 }
     public static string getTimeString
                                     (
                                         DateTime time,
-                                        getTimeString_options opts = getTimeString_options.Date | getTimeString_options.Time
+                                        getTimeString_options opts = getTimeString_options.Date | getTimeString_options.Time | getTimeString_options.Seconds
                                     )
     {
-        String str = "";
-        if (opts == getTimeString_options.Date)
-            str = time.ToString("dd MMM yyyy");
-        if (opts == getTimeString_options.Time)
-            str = time.ToString("HH:mm");
-        else
-            str = time.ToString("HH:mm dd MMM yyyy");
+        String format = "";
 
-        return str;
+        if (opts.HasFlag(getTimeString_options.Time))
+        {
+            if (opts.HasFlag(getTimeString_options.Seconds))
+                format += "HH:mm:ss";
+            else
+                format += "HH:mm";
+        }
+
+        if (opts.HasFlag(getTimeString_options.Date))     // opts.HasFlag()
+        {
+            if (format.Length > 0)
+                format += " ";
+
+            format += "dd MMM yyyy";
+        }
+
+
+        return time.ToString(format);
     }
 }

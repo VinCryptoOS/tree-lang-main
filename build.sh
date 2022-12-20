@@ -15,7 +15,7 @@ then
     exit;
 fi
 
-dotnet $rootDir/build/builder/builder.dll
+bash $rootDir/fbuild.sh
 
 
 # cp -r ../trusts build

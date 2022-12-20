@@ -7,12 +7,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <Optimize>true</Optimize>
-    <OutputPath>${SolutionDir}/bin/tests-exe</OutputPath>
-    <WarningLevel>4</WarningLevel>
-    <LangVersion>Latest</LangVersion>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-</PropertyGroup>
-
 </Project>
