@@ -18,8 +18,8 @@ partial class Program
 
             if (result != ErrorCode.Success)
             {
-                updated_project_found_event?.Invoke(dir);
-                return result;
+                if (result != ErrorCode.SuccessActual)
+                    return result;
             }
         }
 
@@ -36,6 +36,15 @@ partial class Program
         var pd  = Path.Combine(currentDirectoryPath, projectRelativePath);
         var di  = new DirectoryInfo(pd);
 
+        var projectConfFile = new FileInfo(Path.Combine(di.FullName, $"builder-{configurationForDotNet}.pconf"));
+        if (projectConfFile.Exists)
+        {
+            using (var opt = new NotImportantConsoleOptions())
+            {
+                Console.Write($"Project configuration file {projectConfFile.Name} exists");
+            }
+        }
+
         var csProjects  = di.GetFiles("*.csproj");
         var dllPatterns = new List<string>();
         foreach (var dll in csProjects)
@@ -51,7 +60,7 @@ partial class Program
         if (isActual)
         {
             updated_project_found_event?.Invoke(di);
-            return (ErrorCode.Success, di);
+            return (ErrorCode.SuccessActual, di);
         }
         else
         {
@@ -117,7 +126,6 @@ partial class Program
             if (file.LastWriteTimeUtc >= first)
             {
                 Console.WriteLine($"Update file found: {file.FullName}");
-                // updated_project_found_event?.Invoke(file);
                 return false;
             }
         }

@@ -12,6 +12,7 @@ partial class Program
         }
 
         var result = ExecuteBuild();
+
         return (result, true);
     }
 

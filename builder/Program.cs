@@ -93,6 +93,9 @@ partial class Program
 
         /// <summary>Неверный файл конфигурации builder.conf</summary>
         InvalidConfigFile = 3,
+
+        /// <summary>Сборка пропущена, т.к. нет изменений</summary>
+        SuccessActual = 4
     };
 
     /// <summary>Класс для временного переопределения параметров консоли</summary>
@@ -187,12 +190,15 @@ partial class Program
             ProjectName = "." + Path.Combine("./", ProjectName.Substring(cd.Length));
         }
 
-        using (var opt = new NotImportantConsoleOptions())
-        {
-            if (code == ErrorCode.Success)
+        if (code == ErrorCode.Success)
+            using (var opt = new NotErrorConsoleOptions())
                 Console.Error.Write($"Project builded: '{ProjectName}'");
-            else
+        else
+        if (code == ErrorCode.SuccessActual)
+            using (var opt = new NotImportantConsoleOptions())
+                Console.Error.Write($"Project skipped (up to date): '{ProjectName}'");
+        else
+            using (var opt = new ErrorConsoleOptions())
                 Console.Error.Write($"Error '{code}' occured during build for project: '{ProjectName}'");
-        }
     }
 }
