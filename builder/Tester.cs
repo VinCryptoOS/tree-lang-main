@@ -2,8 +2,8 @@ namespace builder;
 
 partial class Program
 {
-    public static ErrorCodes MainTests()
+    public static ErrorCode MainTests()
     {
-        return ErrorCodes.Success;
+        return ErrorCode.Success;
     }
 }

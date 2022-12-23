@@ -4,24 +4,29 @@ namespace builder;
 
 partial class Program
 {
-    public static (ErrorCodes resultCode, bool WillTests) MainBuild()
+    public static (ErrorCode resultCode, bool WillTests) MainBuild()
     {
         if (!checkVersionOfBuildProgramm())
         {
             return (ExecuteFullBuild(), false);
         }
 
-        return (ErrorCodes.Success, true);
+        var result = ExecuteBuild();
+        return (result, true);
     }
 
     /// <summary>Проверяем, актуальна ли на нынешний момент программа билда</summary>
+    /// <param name="di">Директория для проверки</param><param name="fi">Бинарный файл для проверки</param> <summary>
     /// <returns>true - если билдер актуален; иначе false</returns>
     public static bool checkVersionOfBuildProgramm()
     {
         var pathToFile = typeof(Program).Assembly.Location;
         // Console.WriteLine(pathToFile);
 
-        var di    = new DirectoryInfo(Directory.GetCurrentDirectory());
+        var builderPath = Directory.GetCurrentDirectory();
+            builderPath = Path.Combine(builderPath, "builder");
+
+        var di    = new DirectoryInfo(builderPath);
         var fi    = new FileInfo(pathToFile);
         var last  = fi.LastWriteTimeUtc;
         var files = di.GetFiles("*.cs", SearchOption.AllDirectories);
@@ -39,13 +44,17 @@ partial class Program
         return true;
     }
 
-    public delegate void  Builder_Lock_Event      (FileInfo builder_lock_file);
-    public delegate void  Updated_File_Found_Event(FileInfo updatedFile);
+    public delegate void  Builder_Lock_Event         (FileInfo      builder_lock_file);
+    public delegate void  Updated_File_Found_Event   (FileInfo      updatedFile);
+    public delegate void  Updated_Project_Found_Event(DirectoryInfo updatedDir);
+    public delegate void  Build_Project_Event        (ErrorCode code, DirectoryInfo updatedDir);
+                                                                                    /// <summary>Вызывается, если обнаружен файл builder.lock</summary>
+    public static event Builder_Lock_Event?          builder_lock_event;            /// <summary>Вызывается, если в проекте builder обнаружено обновление: требуется полная перестройка проекта builder</summary>
+    public static event Updated_File_Found_Event?    updated_file_found_event;      /// <summary>Вызывается, если в любом проекте обнаружено обновление: требуется полная перестройка проекта</summary>
+    public static event Updated_Project_Found_Event? updated_project_found_event;   /// <summary>Вызывается, после того, как мы построили проект</summary>
+    public static event Build_Project_Event?         end_build_for_project_event;
 
-    public static   event Builder_Lock_Event?       builder_lock_event;
-    public static   event Updated_File_Found_Event? updated_file_found_event;
-
-    public static ErrorCodes ExecuteFullBuild()
+    public static ErrorCode ExecuteFullBuild()
     {
         var fi = new FileInfo("builder.lock");
         if (fi.Exists)
@@ -54,7 +63,7 @@ partial class Program
             if (b != null)
                 b(fi);
 
-            return ErrorCodes.Builder_Lock;
+            return ErrorCode.Builder_Lock;
         }
 
         try
@@ -64,7 +73,7 @@ partial class Program
             var psi = Process.Start("bash", "build.sh");
             psi.WaitForExit();
 
-            return (ErrorCodes) psi.ExitCode;
+            return (ErrorCode) psi.ExitCode;
         }
         finally
         {

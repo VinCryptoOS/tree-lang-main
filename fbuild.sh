@@ -1,3 +1,3 @@
 rootDir=`pwd`
 
-dotnet $rootDir/build/builder/builder.dll
+dotnet $rootDir/build/builder/builder.dll builder.conf

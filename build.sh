@@ -1,6 +1,5 @@
 rootDir=`pwd`
 
-rm -rf ./build/
 mkdir -p ./build/builder
 
 dotnet publish $rootDir/builder --use-current-runtime true --self-contained false -c Release --output $rootDir/build/builder

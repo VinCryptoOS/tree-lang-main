@@ -1,4 +1,5 @@
-﻿using static utils.DateTimeStrings;
+﻿using System.IO;
+using static utils.DateTimeStrings;
 
 namespace builder;
 
@@ -6,9 +7,40 @@ partial class Program
 {
     static int Main(string[] args)
     {
-        using (var opt = new NotImportantConsoleOptions())
+        var builder_config_file_name = args.Length > 0 ? args[0] : "builder.conf";
+        var builder_config_fi        = new FileInfo(builder_config_file_name);
+
+        if (!builder_config_fi.Exists)
         {
-            Console.Write($"Builder started at {getTimeString(DateTime.Now)}");
+            File.WriteAllText
+            (
+                builder_config_fi.FullName,
+                """
+                configuration: Debug
+                output: build
+
+                [projects]
+                """
+            );
+        }
+
+        var configFileLines = File.ReadAllLines(builder_config_fi.FullName);
+        ParseConfigFile(configFileLines);
+
+        using (var opt = new NotImportantConsoleOptions())
+        {            
+            Console.WriteLine($"Builder started at {getTimeString(DateTime.Now)}");
+            Console.WriteLine($"Config file: '{builder_config_fi.FullName}");
+            Console.WriteLine($"Projects count to build: {configuration["projects"].Values.Count}");
+
+            var output_for_configuration = new string[] {"configuration", "output"};
+            foreach (var confOptName in output_for_configuration)
+            {
+                if (!configuration.ContainsKey(confOptName))
+                    return (int) ErrorCode.InvalidConfigFile;
+
+                Console.Write($"{confOptName}: '{configuration[confOptName]}'; ");
+            }
         }
 
         // ---------------- Устанавливаем обработчики ошибок ----------------
@@ -18,7 +50,7 @@ partial class Program
         // ---------------- Компиляция ----------------
 
         var ec = MainBuild();
-        if (ec.resultCode != ErrorCodes.Success)
+        if (ec.resultCode != ErrorCode.Success)
         {
             Console.Error.WriteLine($"{getTimeString(DateTime.Now)}. Error during build");
             return (int) ec.resultCode;
@@ -32,7 +64,7 @@ partial class Program
 
         // ---------------- Тесты ----------------
         ec.resultCode = MainTests();
-        if (ec.resultCode != ErrorCodes.Success)
+        if (ec.resultCode != ErrorCode.Success)
         {
             Console.Error.WriteLine($"{getTimeString(DateTime.Now)}. Error during tests");
             return (int) ec.resultCode;
@@ -43,19 +75,25 @@ partial class Program
             Console.Write($"Builder successfully ended at {getTimeString(DateTime.Now)}");
         }
 
-        return (int) ErrorCodes.Success;
+        return (int) ErrorCode.Success;
     }
 
-    public enum ErrorCodes
+    public enum ErrorCode
     {
-        // Успех
+        /// <summary>Успех</summary>
         Success = 0,
         
-        // Ошибка, которая неверно преобразуется в ErrorCodes
+        /// <summary>Ошибка, которая неверно преобразуется в ErrorCode</summary>
         Unknown = -1,
 
-        // Наличие файла builder.lock - это означает, что билд был неуспешным
-        Builder_Lock = 1
+        /// <summary>Наличие файла builder.lock - это означает, что билд был неуспешным</summary>
+        Builder_Lock = 1,
+
+        /// <summary>Не удалось собрать какой-то из проектов</summary>
+        DotnetError = 2,
+
+        /// <summary>Неверный файл конфигурации builder.conf</summary>
+        InvalidConfigFile = 3,
     };
 
     /// <summary>Класс для временного переопределения параметров консоли</summary>
@@ -118,6 +156,8 @@ partial class Program
     {
         builder_lock_event       += Builder_Lock_ErrorHandler;
         updated_file_found_event += Updated_File_Found_Handler;
+
+        end_build_for_project_event += end_build_for_project_Handler;
     }
 
     public static void Builder_Lock_ErrorHandler(FileInfo builder_lock_file)
@@ -138,4 +178,22 @@ partial class Program
         }
     }
 
+    public static void end_build_for_project_Handler(ErrorCode code, DirectoryInfo updatedFile)
+    {
+        var ProjectName = updatedFile.FullName;
+
+        var cd = Directory.GetCurrentDirectory();
+        if (ProjectName.StartsWith(cd))
+        {
+            ProjectName = "." + Path.Combine("./", ProjectName.Substring(cd.Length));
+        }
+
+        using (var opt = new NotImportantConsoleOptions())
+        {
+            if (code == ErrorCode.Success)
+                Console.Error.Write($"Project builded: '{ProjectName}'");
+            else
+                Console.Error.Write($"Error '{code}' occured during build for project: '{ProjectName}'");
+        }
+    }
 }
