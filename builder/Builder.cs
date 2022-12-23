@@ -36,7 +36,7 @@ partial class Program
         {
             if (file.LastWriteTimeUtc >= last)
             {
-                // Console.WriteLine($"Update file found: {file.FullName}");
+                // Console.WriteLine($"Updated file found: {file.FullName}");
                 updated_file_found_event?.Invoke(file);
                 return false;
             }

@@ -126,7 +126,7 @@ partial class Program
             // Если хотя бы один из файлов-исходников новее, то версия бинарных файлов не актуальна
             if (file.LastWriteTimeUtc >= first)
             {
-                Console.WriteLine($"Update file found: {file.FullName}");
+                // Console.WriteLine($"Updated file found: {file.FullName}");
                 return false;
             }
         }

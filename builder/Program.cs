@@ -10,6 +10,7 @@ partial class Program
         var builder_config_file_name = args.Length > 0 ? args[0] : "builder.conf";
         var builder_config_fi        = new FileInfo(builder_config_file_name);
 
+        // Если файл с опциями не создан, создаём его
         if (!builder_config_fi.Exists)
         {
             File.WriteAllText
@@ -22,12 +23,17 @@ partial class Program
                 [projects]
                 """
             );
+
+            using (var _ = new ErrorConsoleOptions())
+                Console.Error.WriteLine($"Configuration file is not exists: '{builder_config_fi.FullName}'");
+
+            return (int) ErrorCode.InvalidConfigFile;
         }
 
         var configFileLines = File.ReadAllLines(builder_config_fi.FullName);
         ParseConfigFile(configFileLines);
 
-        using (var opt = new NotImportantConsoleOptions())
+        using (var _ = new NotImportantConsoleOptions())
         {            
             Console.WriteLine($"Builder started at {getTimeString(DateTime.Now)}");
             Console.WriteLine($"Config file: '{builder_config_fi.FullName}");
@@ -37,7 +43,12 @@ partial class Program
             foreach (var confOptName in output_for_configuration)
             {
                 if (!configuration.ContainsKey(confOptName))
+                {
+                    using (var _2 = new ErrorConsoleOptions())
+                        Console.Error.WriteLine($"Is not specified required option: {confOptName}");
+
                     return (int) ErrorCode.InvalidConfigFile;
+                }
 
                 Console.Write($"{confOptName}: '{configuration[confOptName]}'; ");
             }
@@ -52,7 +63,9 @@ partial class Program
         var ec = MainBuild();
         if (ec.resultCode != ErrorCode.Success)
         {
-            Console.Error.WriteLine($"{getTimeString(DateTime.Now)}. Error during build");
+            using (var _ = new ErrorConsoleOptions())
+                Console.Error.WriteLine($"{getTimeString(DateTime.Now)}. Error during build");
+
             return (int) ec.resultCode;
         }
 
@@ -60,20 +73,21 @@ partial class Program
             return (int) ec.resultCode;
 
 
-        Console.WriteLine($"Tests started at {getTimeString(DateTime.Now)}");
+        using (var _ = new NotImportantConsoleOptions())
+            Console.Write($"Tests started at {getTimeString(DateTime.Now)}");
 
         // ---------------- Тесты ----------------
         ec.resultCode = MainTests();
         if (ec.resultCode != ErrorCode.Success)
         {
-            Console.Error.WriteLine($"{getTimeString(DateTime.Now)}. Error during tests");
+            using (var _ = new ErrorConsoleOptions())
+                Console.Error.WriteLine($"{getTimeString(DateTime.Now)}. Error during tests");
+
             return (int) ec.resultCode;
         }
 
-        using (var opt = new NotErrorConsoleOptions())
-        {
+        using (var _ = new NotErrorConsoleOptions())
             Console.Write($"Builder successfully ended at {getTimeString(DateTime.Now)}");
-        }
 
         return (int) ErrorCode.Success;
     }
@@ -121,7 +135,7 @@ partial class Program
     {
         using (var opt = new NotErrorConsoleOptions())
         {
-            Console.Error.Write($"Update file found: {updatedFile.FullName}");
+            Console.Write($"Updated file found: {updatedFile.FullName}");
         }
     }
 
