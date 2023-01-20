@@ -21,7 +21,8 @@ partial class Program
     /// <returns>true - если билдер актуален; иначе false</returns>
     public static bool checkVersionOfBuildProgramm()
     {
-        var pathToFile = typeof(Program).Assembly.Location;
+        // var pathToFile = typeof(Program).Assembly.Location;
+        var pathToFile = System.AppContext.BaseDirectory;
         // Console.WriteLine(pathToFile);
 
         var builderPath = Directory.GetCurrentDirectory();

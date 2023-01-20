@@ -1,6 +1,8 @@
 ﻿using static utils.DateTimeStrings;
 using utils.console;
 
+[assembly: System.Reflection.AssemblyCopyright("Copyright © Sergey Vinogradov 2022-*")]
+
 namespace builder;
 
 partial class Program

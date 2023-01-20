@@ -31,4 +31,9 @@ public static class DateTimeStrings
 
         return time.ToString(format);
     }
+
+    public static string getDateVersionString(DateTime time)
+    {
+        return time.ToString("yyyy.MM.dd.HHmm");
+    }
 }

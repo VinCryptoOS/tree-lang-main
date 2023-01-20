@@ -51,8 +51,9 @@ partial class Program
         foreach (var dll in csProjects)
         {
             var dllName = dll.Name.Substring(0, dll.Name.Length - ".csproj".Length);
-            dllName += ".dll";
+            dllPatterns.Add(dllName);
 
+            dllName += ".dll";
             dllPatterns.Add(dllName);
         }
 
