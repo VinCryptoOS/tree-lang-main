@@ -3,24 +3,24 @@ public static class DateTimeStrings
 {
     [Flags]
     /// <summary>Флаги для функции getTimeString_options)</summary>
-    public enum getTimeString_options: byte { None = 0, Date = 1, Time = 2, Seconds = 4 }
-    public static string getTimeString
+    public enum GetTimeString_options: byte { None = 0, Date = 1, Time = 2, Seconds = 4 }
+    public static string GetTimeString
                                     (
                                         DateTime time,
-                                        getTimeString_options opts = getTimeString_options.Date | getTimeString_options.Time | getTimeString_options.Seconds
+                                        GetTimeString_options opts = GetTimeString_options.Date | GetTimeString_options.Time | GetTimeString_options.Seconds
                                     )
     {
         String format = "";
 
-        if (opts.HasFlag(getTimeString_options.Time))
+        if (opts.HasFlag(GetTimeString_options.Time))
         {
-            if (opts.HasFlag(getTimeString_options.Seconds))
+            if (opts.HasFlag(GetTimeString_options.Seconds))
                 format += "HH:mm:ss";
             else
                 format += "HH:mm";
         }
 
-        if (opts.HasFlag(getTimeString_options.Date))     // opts.HasFlag()
+        if (opts.HasFlag(GetTimeString_options.Date))     // opts.HasFlag()
         {
             if (format.Length > 0)
                 format += " ";
@@ -32,7 +32,7 @@ public static class DateTimeStrings
         return time.ToString(format);
     }
 
-    public static string getDateVersionString(DateTime time)
+    public static string GetDateVersionString(DateTime time)
     {
         return time.ToString("yyyy.MM.dd.HHmm");
     }

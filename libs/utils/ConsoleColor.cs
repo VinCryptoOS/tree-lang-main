@@ -1,3 +1,6 @@
+using System.IO.Compression;
+
+
 /// <summary>Здесь определены преобразователи цветов консоли</summary>
 namespace utils.console;
 
@@ -22,6 +25,7 @@ public abstract class ConsoleOptions: IDisposable
     public void Dispose()
     {
         Disposing();
+        GC.SuppressFinalize(this);
     }
 
     public virtual void Disposing()
